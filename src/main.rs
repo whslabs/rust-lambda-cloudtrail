@@ -27,10 +27,32 @@ async fn function_handler(event: LambdaEvent<LogsEvent>) -> Result<(), Error> {
 
         println!("{:?}", v);
 
+        let arn = v["requestParameters"]["tagSpecificationSet"]["items"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|x| x["resourceType"] == "image")
+            .map(|x| &x["tags"])
+            .next()
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|x| x["key"] == "Ec2ImageBuilderArn")
+            .map(|x| &x["value"])
+            .next()
+            .unwrap()
+            .as_str()
+            .unwrap();
+
         let rsp = client
             .publish()
             .topic_arn(std::env::var("TOPIC_ARN").unwrap())
-            .message(v["responseElements"]["imageId"].as_str().unwrap())
+            .message(format!(
+                "{} {}",
+                arn,
+                v["responseElements"]["imageId"].as_str().unwrap()
+            ))
             .send()
             .await?;
 
