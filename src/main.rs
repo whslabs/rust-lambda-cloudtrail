@@ -45,13 +45,24 @@ async fn function_handler(event: LambdaEvent<LogsEvent>) -> Result<(), Error> {
             .as_str()
             .unwrap();
 
+        let a: Vec<&str> = arn.split("/").collect();
+
+        let url = format!(
+            "{}{}/log-events/{}$252F{}",
+            std::env::var("CLOUDWATCH_BASE_URL").unwrap(),
+            a[1],
+            a[2],
+            a[3]
+        );
+
         let rsp = client
             .publish()
             .topic_arn(std::env::var("TOPIC_ARN").unwrap())
             .message(format!(
-                "{} {}",
+                "{} {} {}",
                 arn,
-                v["responseElements"]["imageId"].as_str().unwrap()
+                v["responseElements"]["imageId"].as_str().unwrap(),
+                url
             ))
             .send()
             .await?;
