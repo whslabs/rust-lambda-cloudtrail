@@ -56,7 +56,7 @@ async fn function_handler(event: LambdaEvent<LogsEvent>) -> Result<(), Error> {
         );
 
         let subject = match a[1] {
-            "whslabs-cardano-node" => "New Cardano node",
+            "whslabs-cardano-node" => "New Cardano Node",
             _ => "New AMI",
         };
 
