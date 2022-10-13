@@ -55,8 +55,14 @@ async fn function_handler(event: LambdaEvent<LogsEvent>) -> Result<(), Error> {
             a[3]
         );
 
+        let subject = match a[1] {
+            "whslabs-cardano-node" => "New Cardano node",
+            _ => "New AMI",
+        };
+
         let rsp = client
             .publish()
+            .subject(subject)
             .topic_arn(std::env::var("TOPIC_ARN").unwrap())
             .message(format!(
                 "{} {} {}",
