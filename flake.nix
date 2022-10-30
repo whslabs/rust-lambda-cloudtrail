@@ -1,36 +1,33 @@
 {
   inputs = {
-    fenix.url = "github:nix-community/fenix";
-    flake-utils.url = "github:numtide/flake-utils";
-    naersk.url = "github:nix-community/naersk";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    cargo2nix.url = "github:whslabs/cargo2nix-fix/unstable-fix";
+    flake-utils.follows = "cargo2nix/flake-utils";
+    nixpkgs.follows = "cargo2nix/nixpkgs";
   };
 
-  outputs = { self, fenix, flake-utils, naersk, nixpkgs }:
-    flake-utils.lib.eachDefaultSystem (
-      system: let
-        pkgs = (import nixpkgs) {
+  outputs = inputs: with inputs;
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs {
           inherit system;
+
+          crossSystem = {
+            config = "x86_64-unknown-linux-musl";
+          };
+
+          overlays = [ cargo2nix.overlays.default ];
         };
 
-        toolchain = with fenix.packages.${system};
-          combine [
-            minimal.cargo
-            minimal.rustc
-            targets.x86_64-unknown-linux-musl.latest.rust-std
-          ];
-
-        naersk' = naersk.lib.${system}.override {
-          cargo = toolchain;
-          rustc = toolchain;
+        rustPkgs = pkgs.rustBuilder.makePackageSet {
+          packageFun = import ./Cargo.nix;
+          rustVersion = "1.64.0";
+          target = "x86_64-unknown-linux-musl";
         };
 
       in rec {
-        defaultPackage = naersk'.buildPackage {
-          CARGO_BUILD_TARGET = "x86_64-unknown-linux-musl";
-          doCheck = true;
-          nativeBuildInputs = with pkgs; [ pkgsStatic.stdenv.cc ];
-          src = ./.;
+        packages = {
+          lambda = (rustPkgs.workspace.rust-lambda-cloudtrail {}).bin;
+          default = packages.lambda;
         };
       }
     );
