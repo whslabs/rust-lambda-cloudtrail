@@ -29,6 +29,7 @@
           lambda = (rustPkgs.workspace.rust-lambda-cloudtrail {}).bin;
           default = packages.lambda;
         };
+        defaultPackage = packages.default;
       }
     );
 }
