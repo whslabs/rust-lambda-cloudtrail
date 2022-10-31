@@ -1,6 +1,6 @@
 {
   inputs = {
-    cargo2nix.url = "github:whslabs/cargo2nix-fix/unstable-fix";
+    cargo2nix.url = "github:cargo2nix/cargo2nix/unstable";
     flake-utils.follows = "cargo2nix/flake-utils";
     nixpkgs.follows = "cargo2nix/nixpkgs";
   };
