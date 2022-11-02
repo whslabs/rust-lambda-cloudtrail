@@ -1,0 +1,25 @@
+FROM nixos/nix
+
+RUN echo experimental-features = \
+  flakes \
+  nix-command \
+  >> /etc/nix/nix.conf
+
+RUN echo substituters = \
+  https://cache.nixos.org \
+  https://whslabs.cachix.org \
+  >> /etc/nix/nix.conf
+
+RUN echo trusted-public-keys = \
+  cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= \
+  whslabs.cachix.org-1:lIS0YQWf2C+ZsDcUs4CgXScgghEqQ85gOjonfNMg7n0= \
+  >> /etc/nix/nix.conf
+
+ARG CACHIX_AUTH_TOKEN
+
+ENV CACHIX_AUTH_TOKEN $CACHIX_AUTH_TOKEN
+ENV SHELL /bin/sh
+RUN nix-env -iA cachix -f https://cachix.org/api/v1/install
+WORKDIR /source/
+
+ENTRYPOINT ["./dapper.sh"]
