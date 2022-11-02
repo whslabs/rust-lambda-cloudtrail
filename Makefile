@@ -8,10 +8,18 @@ bin/dapper:
 .DEFAULT_GOAL :=
 
 all: bin/dapper
-	@bin/dapper
+	@bin/dapper nix build
+
+cache: bin/dapper
+	@bin/dapper cachix watch-exec whslabs -- nix build
 
 s shell: bin/dapper
 	@bin/dapper \
 		-m bind \
 		-s \
 		;
+
+clean:
+	rm -rf bin/
+	rm -rf target/
+	rm -rf result-bin

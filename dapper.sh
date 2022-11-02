@@ -1,7 +1,5 @@
 #! /bin/sh
 
-nix-env -i jq
+rm -rf result-bin
 
-nix build --json \
-  | jq -r '.[].outputs | to_entries[].value' \
-  | cachix push whslabs
+exec "$@"
